@@ -123,7 +123,7 @@ class MaterialController extends Controller
             // Validación para update (puede que el archivo no sea requerido)
             $validated = $request->validate([
                 'title' => 'sometimes|string|max:100',
-                'file' => 'sometimes|file|mimes:pdf,docx,pptx|max:2048',
+                'file' => 'sometimes|file|mimes:pdf,docx,pptx|max:102400',
                 'rating' => 'sometimes|integer|between:0,5',
                 'semester' => 'sometimes|integer|between:1,6',
                 'unit' => 'sometimes|integer|between:1,4'
@@ -193,7 +193,7 @@ class MaterialController extends Controller
     {
         return $request->validate([
             'title' => 'required|string|max:100',
-            'file' => 'required|file|mimes:pdf,docx,pptx|max:2048',
+            'file' => 'required|file|mimes:pdf,docx,pptx|max:102400',
             'rating' => 'nullable|integer|between:0,5',
             'semester' => 'nullable|integer|between:1,6',
             'unit' => 'nullable|integer|between:1,4',
@@ -201,3 +201,4 @@ class MaterialController extends Controller
         ]);
     }
 }
+
