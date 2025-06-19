@@ -31,20 +31,25 @@ class BookmarkController extends Controller
 
     public function index(Request $request)
     {
-        $bookmarks = $request->user()
-            ->bookmarks()
-            ->select('id', 'title', 'file_path', 'semester', 'unit', 'created_at')
+        $user = $request->user();
+
+        // Base query con optimizaciones
+        $bookmarks = $user->bookmarks()
+            ->with(['user:id,name']) // Ejemplo de relación opcional
+            ->select('materials.id', 'title', 'file_path', 'semester', 'unit', 'created_at')
+            ->when($request->semester, fn($q, $semester) => $q->where('semester', $semester))
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        // Transformar datos para Android
+        // Transformación
         $formattedBookmarks = $bookmarks->getCollection()->map(function ($material) {
             return [
                 'id' => $material->id,
                 'title' => $material->title,
-                'file_url' => asset("storage/{$material->file_path}"),
+                'file_url' => $material->file_path ? asset("storage/{$material->file_path}") : null,
                 'semester' => $material->semester,
                 'unit' => $material->unit,
+                'professor' => $material->user->name ?? 'Sin profesor', // Si cargaste la relación
                 'created_at' => $material->created_at->toIso8601String()
             ];
         });
@@ -55,8 +60,7 @@ class BookmarkController extends Controller
             'pagination' => [
                 'current_page' => $bookmarks->currentPage(),
                 'total_pages' => $bookmarks->lastPage(),
-                'total_items' => $bookmarks->total(),
-                'per_page' => $bookmarks->perPage()
+                'total_items' => $bookmarks->total()
             ]
         ]);
     }
